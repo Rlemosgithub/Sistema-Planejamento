@@ -111,8 +111,8 @@ def _load_df(filename):
 def _sync_justificativas():
     """
     Sincroniza os dados de atestado_falta.xlsx com Justificativas.xlsx.
-    Converte os registros de atestados em justificativas com código correspondente
-    e atualiza o arquivo Justificativas.xlsx.
+    Atualiza, adiciona ou remove registros de justificativas com base nos atestados,
+    preservando justificativas não relacionadas a atestados.
     """
     folder = current_app.config['UPLOAD_FOLDER']
     atestado_path = os.path.join(folder, 'atestado_falta.xlsx')
@@ -154,7 +154,7 @@ def _sync_justificativas():
                     'CODIGO': code
                 })
 
-        # Cria DataFrame com novas justificativas
+        # Cria DataFrame com novas justificativas a partir de atestados
         new_just_df = pd.DataFrame(just_from_atestado)
 
         # Remove duplicatas mantendo apenas o registro mais recente
@@ -164,24 +164,26 @@ def _sync_justificativas():
                 keep='last'
             )
 
-        # Mescla com justificativas existentes (mantém justificativas não relacionadas a atestados)
+        # Filtra justificativas existentes, preservando as não relacionadas a atestados
+        atestado_codes = list(deviation_to_code.values())
         if not just_df.empty:
-            # Remove justificativas antigas que correspondem a atestados
-            just_df = just_df[~just_df['CODIGO'].isin(deviation_to_code.values())]
-            just_df = pd.concat([just_df, new_just_df], ignore_index=True)
+            non_atestado_just = just_df[~just_df['CODIGO'].isin(atestado_codes)]
         else:
-            just_df = new_just_df
+            non_atestado_just = pd.DataFrame(columns=['OBSERVAÇÃO', 'DISCIPLINA', 'DATA', 'FRENTE DE TRABALHO', 'CODIGO'])
+
+        # Mescla justificativas não relacionadas com as novas justificativas de atestados
+        updated_just_df = pd.concat([non_atestado_just, new_just_df], ignore_index=True)
 
         # Remove duplicatas finais
-        just_df = just_df.drop_duplicates(
+        updated_just_df = updated_just_df.drop_duplicates(
             subset=['OBSERVAÇÃO', 'DISCIPLINA', 'DATA'],
             keep='last'
         )
 
         # Salva o arquivo atualizado
         with pd.ExcelWriter(just_path, engine='openpyxl') as writer:
-            just_df.to_excel(writer, index=False, sheet_name='Justificativas')
-        logger.info(f"Justificativas.xlsx atualizado com {len(just_df)} registros")
+            updated_just_df.to_excel(writer, index=False, sheet_name='Justificativas')
+        logger.info(f"Justificativas.xlsx atualizado com {len(updated_just_df)} registros")
     except Exception as e:
         logger.error(f"Erro ao sincronizar Justificativas.xlsx: {str(e)}")
         flash(f"Erro ao sincronizar justificativas: {str(e)}", 'danger')
