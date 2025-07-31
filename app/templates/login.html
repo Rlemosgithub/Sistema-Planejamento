@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Login{% endblock %}
+
+{% block body_tag %}
+<body class="login-page">
+{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  .login-card::before {
+    content: '';
+    position: absolute;
+    top: -50px;
+    left: -50px;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.2), transparent);
+    z-index: -1;
+  }
+  .login-card::after {
+    content: '';
+    position: absolute;
+    bottom: -50px;
+    right: -50px;
+    width: 100px;
+    height: 100px;
+    background: radial-gradient(circle, rgba(249, 115, 22, 0.2), transparent);
+    z-index: -1;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="login-wrapper">
+  <div class="login-card">
+    <h2>Planejamento SGS</h2>
+    <p class="subtitle">Entre para gerenciar seus dados</p>
+    <form method="post" class="login-form">
+      <div class="input-group">
+        <input type="text" name="username" id="username" placeholder=" " required autocomplete="username">
+        <label for="username">Usuário</label>
+      </div>
+      <div class="input-group">
+        <input type="password" name="password" id="password" placeholder=" " required autocomplete="current-password">
+        <label for="password">Senha</label>
+      </div>
+      <button type="submit" class="btn-login">
+        <i class="fa fa-sign-in-alt"></i> Entrar
+      </button>
+    </form>
+    {% with msgs = get_flashed_messages(with_categories=true) %}
+      {% if msgs %}
+        <div class="login-alerts">
+          {% for cat, msg in msgs %}
+            <div class="alert {{ cat }}">{{ msg }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+    {% endwith %}
+  </div>
+</section>
+{% endblock %}

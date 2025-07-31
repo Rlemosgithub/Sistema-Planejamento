@@ -1,0 +1,349 @@
+/* style.css */
+
+/* Core Variables */
+:root {
+  --bg: #f4f6fa;
+  --dark: #1e2a38;
+  --light: #ffffff;
+  --primary: #0665c0;
+  --error: #e74c3c;
+}
+
+/* Global Styles */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--bg);
+  color: #333;
+}
+
+/* Sidebar */
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 240px;
+  height: 100vh;
+  background: var(--dark);
+  display: flex;
+  flex-direction: column;
+}
+.sidebar .logo {
+  padding: 20px;
+  text-align: center;
+}
+.sidebar nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.sidebar nav a {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #aab8c2;
+  text-decoration: none;
+}
+.sidebar nav a.active,
+.sidebar nav a:hover {
+  background: #273444;
+  color: var(--light);
+}
+.sidebar .user {
+  margin-top: auto;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #aab8c2;
+}
+.sidebar .user img {
+  width: 32px;
+  border-radius: 50%;
+}
+
+/* Main Content */
+.main-content {
+  margin-left: 240px;
+}
+.top-nav {
+  background: var(--light);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.top-nav .breadcrumbs {
+  color: #555;
+}
+.top-nav .actions i {
+  margin-left: 15px;
+  cursor: pointer;
+  color: #666;
+}
+.search-bar {
+  position: relative;
+}
+.search-bar input {
+  padding: 5px 35px 5px 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+.search-bar .fa-search {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* Upload Section */
+.upload-section {
+  background: var(--light);
+  padding: 20px;
+  margin: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+.btn-upload {
+  background: var(--primary);
+  color: var(--light);
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-upload:hover {
+  background: #054a8c;
+}
+
+/* Filter Form & Validate Button */
+.filter-form {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 10px 20px;
+}
+.filter-form select {
+  padding: 4px 8px;
+  font-size: 0.9em;
+}
+.btn-validate {
+  margin-left: auto;
+  background: var(--primary);
+  color: var(--light);
+  padding: 6px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+}
+.btn-validate i {
+  margin-right: 4px;
+}
+
+/* Cards */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px,1fr));
+  gap: 20px;
+  padding: 0 20px 20px;
+}
+.card {
+  background: var(--light);
+  padding: 20px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: transform .2s;
+  cursor: pointer;
+}
+.card:hover {
+  transform: translateY(-5px);
+}
+.card i {
+  font-size: 2em;
+  color: var(--primary);
+}
+.card .info h3 {
+  margin: 0;
+  font-size: 1.5em;
+}
+.card .info p {
+  margin: 5px 0 0;
+  color: #777;
+}
+
+/* Dashboard Table */
+.table-container {
+  background: var(--light);
+  margin: 0 20px 20px;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  overflow-x: auto;
+}
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.data-table th,
+.data-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+  font-size: 0.85em;
+}
+.data-table th {
+  background: var(--light);
+  text-transform: uppercase;
+  color: #555;
+}
+.error-row {
+  background: var(--error);
+  color: var(--dark);
+}
+.status-ok {
+  color: green;
+}
+.status-error {
+  color: var(--error);
+}
+
+/* Validation Page */
+.validation-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 20px;
+}
+.validation-filters {
+  display: flex;
+  gap: 10px;
+}
+.validation-filters select {
+  padding: 4px 8px;
+  font-size: 0.9em;
+}
+.discipline-cards {
+  display: flex;
+  gap: 10px;
+  padding: 10px 20px;
+  overflow-x: auto;
+}
+.card-filter {
+  background: var(--light);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9em;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  transition: background 0.2s;
+}
+.card-filter.active,
+.card-filter:hover {
+  background: var(--primary);
+  color: #fff;
+}
+.validation-table-container {
+  overflow-x: auto;
+  margin: 0 20px 20px;
+}
+.validation-table {
+  width: max-content;
+  border-collapse: collapse;
+  font-size: 0.8em;
+}
+.validation-table th,
+.validation-table td {
+  padding: 4px 6px;
+  border: 1px solid #ddd;
+  text-align: center;
+}
+.validation-table th {
+  background: var(--light);
+  font-weight: bold;
+}
+.error-cell {
+  background: var(--error) !important;
+  color: var(--dark);
+  font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar {
+    width: 60px;
+  }
+  .sidebar nav a span {
+    display: none;
+  }
+  .main-content {
+    margin-left: 60px;
+  }
+  .filter-form {
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 10px;
+  }
+  
+  .cards {
+    grid-template-columns: repeat(auto-fill, minmax(140px,1fr));
+  }
+
+  /* Atestado/Falta Form */
+.upload-section h2 {
+  margin: 20px;
+  font-size: 1.2em;
+  color: var(--dark);
+}
+.filter-form select {
+  padding: 5px 8px;
+  margin: 0 10px 10px 0;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 0.9em;
+}
+.filter-form label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+.btn-upload {
+  background: var(--primary);
+  color: var(--light);
+}
+
+/* Destaca tudo que estiver fora dos padrões (±0,01 de 7.95,8.00,8.80,9.00,10.00) */
+.error-cell {
+  background: var(--error) !important;
+  color: var(--dark);
+  font-weight: bold;
+}
+
+/* Célula “vazia” sem registro (X) */
+.empty-cell {
+  background: #ccc;
+  color: #000;
+}
+
+
+/* Células sem horas */
+.empty-cell {
+  background: #ccc;
+  color: #000;
+}
+/* Justificativas */
+.code-AT { background: yellow; color: #000; }
+.code-AU { background: red;    color: #fff; }
+.code-SP { background: gray;   color: #fff; }
+.code-DEP{ background: purple; color: #fff; }
+
+
+
+}

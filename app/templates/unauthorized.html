@@ -1,0 +1,20 @@
+<!-- unauthorized.html -->
+{% extends 'base.html' %}
+{% set title = 'Acesso Restrito' %}
+{% set body_class = 'unauth-page' %}
+{% set breadcrumbs = '' %}
+
+{% block content %}
+<div class="unauth-wrapper">
+  <div class="unauth-card">
+    <div class="icon-lock"><i class="fa fa-lock"></i></div>
+    <h1>🔒 Acesso Restrito</h1>
+    <p>Você precisa estar logado para acessar o <strong>Planejamento SGS</strong>.</p>
+    <a href="{{ url_for('auth.login') }}" class="btn-unauth">
+      <i class="fa fa-sign-in-alt"></i> Ir para Login
+      <span class="ripple"></span>
+    </a>
+  </div>
+  <div class="unauth-bg"></div>
+</div>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Atestado / Falta{% endblock %}
+{% block content %}
+
+<div class="validation-header">
+  <h2>Atestado / Falta</h2>
+  <a href="{{ url_for('main.dashboard', file=file) }}" class="btn-upload">
+    <i class="fa fa-arrow-left"></i> Voltar
+  </a>
+</div>
+
+<form method="post" action="{{ url_for('main.atestado', file=file) }}" class="filter-form">
+  <label>Disciplina:</label>
+  <select name="discipline" required>
+    <option disabled selected>Selecione</option>
+    {% for d in disciplines %}<option>{{ d }}</option>{% endfor %}
+  </select>
+
+  <label>Colaborador:</label>
+  <select name="collaborator" required>
+    <option disabled selected>Selecione</option>
+    {% for c in collaborators %}<option>{{ c }}</option>{% endfor %}
+  </select>
+
+  <label>Data:</label>
+  <select name="date" required>
+    <option disabled selected>Selecione</option>
+    {% for dt in dates %}<option>{{ dt }}</option>{% endfor %}
+  </select>
+
+  <label>Desvio:</label>
+  <select name="deviation" required>
+    <option disabled selected>Selecione</option>
+    {% for dv in deviations %}<option>{{ dv }}</option>{% endfor %}
+  </select>
+
+  <button type="submit" class="btn-upload">
+    <i class="fa fa-save"></i> Gravar
+  </button>
+</form>
+
+<h3>Justificativas Registradas</h3>
+<table class="data-table">
+  <thead>
+    <tr>
+      <th>#</th><th>Colaborador</th><th>Disciplina</th><th>Data</th><th>Desvio</th><th>Ações</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for j in justificativas %}
+    <tr>
+      <td>{{ loop.index0 }}</td>
+      <td>{{ j.OBSERVAÇÃO }}</td>
+      <td>{{ j.DISCIPLINA }}</td>
+      <td>{{ j.DATARDO_STR }}</td>
+      <td>{{ j.DESVIO }}</td>
+      <td>
+        <form method="post" action="{{ url_for('main.atestado_delete', idx=loop.index0) }}?file={{ file }}" style="display:inline">
+          <button type="submit" class="status-error"><i class="fa fa-trash"></i></button>
+        </form>
+        <a href="{{ url_for('main.atestado_edit', idx=loop.index0, file=file) }}" class="status-ok">
+          <i class="fa fa-edit"></i>
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

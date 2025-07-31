@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ title }} | Planejamento SGS</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    /* ─── Variáveis de tema para botões ───────────────────────────────── */
+    :root {
+      --btn-bg: #0665c0;
+      --btn-bg-hover: #054a8c;
+      --btn-text: #ffffff;
+      --btn-radius: 0.5rem;
+      --btn-shadow: rgba(0,0,0,0.1);
+    }
+    /* ─── Estilo base de todos os botões ─────────────────────────────── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--btn-text);
+      background-color: var(--btn-bg);
+      border: none;
+      border-radius: var(--btn-radius);
+      box-shadow: 0 2px 4px var(--btn-shadow);
+      cursor: pointer;
+      transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background-color: var(--btn-bg-hover);
+      box-shadow: 0 4px 8px var(--btn-shadow);
+      transform: translateY(-1px);
+    }
+    .btn:active {
+      background-color: var(--btn-bg-hover);
+      box-shadow: 0 2px 4px var(--btn-shadow);
+      transform: translateY(0);
+    }
+    .btn:focus {
+      outline: 2px solid var(--btn-bg-hover);
+      outline-offset: 2px;
+    }
+    /* ─── Botões específicos ───────────────────────────────────────── */
+    .btn-upload {
+      background-color: #28a745;
+    }
+    .btn-upload:hover {
+      background-color: #1e7e34;
+    }
+    .btn-validate {
+      background-color: #17a2b8;
+    }
+    .btn-validate:hover {
+      background-color: #117a8b;
+    }
+    .btn-atestado {
+      background-color: #ffc107;
+      color: #333;
+    }
+    .btn-atestado:hover {
+      background-color: #e0a800;
+    }
+    .btn-pending {
+      background-color: #dc3545;
+    }
+    .btn-pending:hover {
+      background-color: #bd2130;
+    }
+  </style>
+</head>
+<body class="{{ body_class|default('') }}">
+
+  <aside class="sidebar p-3 bg-dark">
+    {% block sidebar %}
+    <nav class="sidebar-nav d-flex flex-column gap-3">
+      <a href="{{ url_for('main.dashboard') }}"
+         class="sidebar-link d-flex align-items-center {% if request.endpoint=='main.dashboard' %}active{% endif %}">
+        <i class="fa fa-tachometer-alt me-2"></i><span>Dashboard</span>
+      </a>
+      <a href="{{ url_for('main.upload') }}"
+         class="sidebar-link d-flex align-items-center {% if request.endpoint=='main.upload' %}active{% endif %}">
+        <i class="fa fa-upload me-2"></i><span>Carregar Planilhas</span>
+      </a>
+      <a href="{{ url_for('main.validation', file=selected_file, discipline=selected_discipline) }}"
+         class="sidebar-link d-flex align-items-center {% if request.endpoint=='main.validation' %}active{% endif %}">
+        <i class="fa fa-table me-2"></i><span>Validação</span>
+      </a>
+      <a href="{{ url_for('main.pending', file=selected_file, discipline=selected_discipline) }}"
+         class="sidebar-link d-flex align-items-center {% if request.endpoint=='main.pending' %}active{% endif %}">
+        <i class="fa fa-clock me-2"></i><span>Pendentes</span>
+      </a>
+      <a href="{{ url_for('main.atestado', file=selected_file) }}"
+         class="sidebar-link d-flex align-items-center {% if request.endpoint.startswith('main.atestado') %}active{% endif %}">
+        <i class="fa fa-file-medical me-2"></i><span>Atestados</span>
+      </a>
+    </nav>
+    {% endblock %}
+  </aside>
+
+  <div class="main-wrapper">
+    <header class="top-nav py-2 px-4 bg-white shadow-sm d-flex justify-content-between align-items-center">
+      <div class="breadcrumbs text-muted">
+        <i class="fa fa-home me-1"></i> / {{ breadcrumbs|default('') }}
+      </div>
+      <!-- botão Voltar removido -->
+    </header>
+
+    <section class="content-area p-4">
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          <div class="alerts mb-3">
+            {% for cat, msg in msgs %}
+              <div class="alert alert-{{ cat }} rounded-pill py-2">
+                {{ msg }}
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </section>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

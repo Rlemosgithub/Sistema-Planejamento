@@ -1,0 +1,161 @@
+{% extends 'base.html' %}
+{% block title %}Atestado / Falta{% endblock %}
+{% block breadcrumbs %}Atestado / Falta{% endblock %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  .container { max-width: 1400px; margin: auto; padding: 16px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="card mb-4">
+    <div class="flex justify-between items-center p-3">
+      <h1 class="card-title">Atestado / Falta</h1>
+      <a href="{{ url_for('main.dashboard', file=file) }}" class="btn btn-outline btn-sm">
+        <i class="fa fa-arrow-left"></i> Voltar
+      </a>
+    </div>
+    <nav aria-label="breadcrumb" class="px-3 pb-3">
+      <ol class="flex space-x-2 text-sm">
+        <li><a href="{{ url_for('main.dashboard') }}" class="text-primary hover:underline">Home</a></li>
+        <li>/</li>
+        <li class="text-gray-600">Atestado / Falta</li>
+      </ol>
+    </nav>
+  </div>
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="mb-4">
+        {% for category, message in messages %}
+          <div class="p-3 rounded-lg {{ 'bg-green-100 text-success' if category == 'success' else 'bg-yellow-100 text-warning' if category == 'warning' else 'bg-red-100 text-error' }}">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  <div class="card mb-4">
+    <div class="card-title p-3">Nova Justificativa</div>
+    <form method="post" action="{{ url_for('main.atestado', file=file) }}" class="flex flex-wrap gap-3 p-3">
+      <div class="flex flex-col flex-1 min-w-[160px]">
+        <label>Disciplina</label>
+        <select name="discipline" class="form-select" required>
+          <option value="" disabled selected>Selecione</option>
+          {% for d in disciplines %}
+            <option value="{{ d }}" {% if d == selected_discipline %}selected{% endif %}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex flex-col flex-1 min-w-[160px]">
+        <label>Colaborador</label>
+        <select name="collaborator" class="form-select" required>
+          <option value="" disabled selected>Selecione</option>
+          {% for c in collaborators %}
+            <option value="{{ c }}">{{ c }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex flex-col flex-1 min-w-[160px]">
+        <label>Data</label>
+        <select name="date" class="form-select" required>
+          <option value="" disabled selected>Selecione</option>
+          {% for dt in dates %}
+            <option value="{{ dt }}">{{ dt }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex flex-col flex-1 min-w-[160px]">
+        <label>Desvio</label>
+        <select name="deviation" class="form-select" required>
+          <option value="" disabled selected>Selecione</option>
+          {% for dv in deviations %}
+            <option value="{{ dv }}">{{ dv }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      {% for col in columns if col not in ['OBSERVAÇÃO', 'DISCIPLINA', 'DATARDO_STR', 'DESVIO'] %}
+        <div class="flex flex-col flex-1 min-w-[160px]">
+          <label>{{ col }}</label>
+          <input type="text" name="{{ col }}" class="form-control" placeholder="Digite {{ col }}...">
+        </div>
+      {% endfor %}
+      <div class="flex items-end">
+        <button type="submit" class="btn btn-sm">
+          <i class="fa fa-save"></i> Gravar
+        </button>
+      </div>
+    </form>
+  </div>
+  <div class="card">
+    <div class="card-title p-3">Justificativas Registradas</div>
+    <div class="search-bar p-3">
+      <i class="fa fa-search"></i>
+      <input type="text" id="justificationSearch" class="form-control" placeholder="Pesquisar justificativas...">
+    </div>
+    <table id="justificationTable" class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          {% for col in columns %}
+            <th>{{ col }}</th>
+          {% endfor %}
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for j in justificativas %}
+          <tr data-search="{% for col in columns %}{{ j[col] }} {% endfor %}">
+            <td>{{ loop.index }}</td>
+            {% for col in columns %}
+              <td>{{ j[col] }}</td>
+            {% endfor %}
+            <td>
+              <form method="post" action="{{ url_for('main.atestado_delete', idx=loop.index0, file=file, discipline=selected_discipline) }}" style="display:inline">
+                <button type="submit" class="text-error hover:text-red-700" title="Excluir">
+                  <i class="fa fa-trash"></i>
+                </button>
+              </form>
+              <a href="{{ url_for('main.atestado_edit', idx=loop.index0, file=file, discipline=selected_discipline) }}" class="text-success hover:text-green-700 ml-2" title="Editar">
+                <i class="fa fa-edit"></i>
+              </a>
+            </td>
+          </tr>
+        {% endfor %}
+        {% if not justificativas %}
+          <tr>
+            <td colspan="{{ columns|length + 2 }}" class="text-center text-gray-600 py-4">Nenhum registro encontrado.</td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('justificationSearch').addEventListener('input', debounce(() => {
+    const term = document.getElementById('justificationSearch').value.trim().toLowerCase();
+    document.querySelectorAll('#justificationTable tbody tr').forEach(row => {
+      const text = row.dataset.search.toLowerCase();
+      row.style.display = text.includes(term) ? '' : 'none';
+    });
+  }, 300));
+});
+</script>
+{% endblock %}

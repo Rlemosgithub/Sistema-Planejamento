@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% set title = 'Pendente CPA' %}
+{% set breadcrumbs = 'Pendente CPA' %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+  .dashboard-container { max-width: 1400px; margin: auto; padding: 16px; }
+  .no-data { text-align: center; color: #6B7280; font-size: 0.875rem; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <div class="filters-bar">
+    <div class="flex flex-col">
+      <label>Arquivo</label>
+      <select id="filterFile" class="form-select" onchange="updateFilters()">
+        <option value="">Selecione um arquivo</option>
+        {% for f in files %}
+          <option value="{{ f }}" {% if f == selected_file %}selected{% endif %}>{{ f }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex flex-col">
+      <label>Disciplina</label>
+      <select id="filterDiscipline" class="form-select" onchange="updateFilters()">
+        <option value="All">Todas Disciplinas</option>
+        {% for d in disciplines %}
+          <option value="{{ d }}" {% if d == selected_discipline %}selected{% endif %}>{{ d }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex flex-col">
+      <label>Data</label>
+      <select id="filterDate" class="form-select" onchange="updateFilters()">
+        <option value="All">Todas Datas</option>
+        {% for dt in dates %}
+          <option value="{{ dt }}" {% if dt == selected_date %}selected{% endif %}>{{ dt }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex flex-col">
+      <label>Pesquisar</label>
+      <div class="search-bar">
+        <i class="fa fa-search"></i>
+        <input id="liveSearch" type="text" class="form-control" placeholder="Pesquisar colaborador...">
+      </div>
+    </div>
+    {% if selected_file %}
+      <div class="flex items-end">
+        <a href="{{ url_for('main.export_pendentes', file=selected_file, discipline=selected_discipline, date=selected_date) }}"
+           class="btn btn-sm">
+          <i class="fa fa-file-export"></i> Exportar
+        </a>
+      </div>
+    {% endif %}
+  </div>
+  <div class="table-container">
+    <table id="pendingTable" class="data-table">
+      <thead>
+        <tr>
+          <th>NOME</th>
+          <th>DISCIPLINA</th>
+          <th>DATA</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for line in pending_lines %}
+          <tr data-search="{{ line.NOME }} {{ line.DISCIPLINA }} {{ line.DATA }}">
+            <td>{{ line.NOME }}</td>
+            <td>{{ line.DISCIPLINA }}</td>
+            <td>{{ line.DATA }}</td>
+          </tr>
+        {% endfor %}
+        {% if not pending_lines %}
+          <tr>
+            <td colspan="3" class="no-data">
+              Nenhum colaborador com pendências nesta data.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+function updateFilters() {
+  const file = document.getElementById('filterFile').value;
+  const discipline = document.getElementById('filterDiscipline').value;
+  const date = document.getElementById('filterDate').value;
+  const url = new URL(window.location);
+  if (file) url.searchParams.set('file', file);
+  else url.searchParams.delete('file');
+  url.searchParams.set('discipline', discipline);
+  url.searchParams.set('date', date);
+  window.location = url;
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('liveSearch').addEventListener('input', debounce(() => {
+    const term = document.getElementById('liveSearch').value.toLowerCase();
+    document.querySelectorAll('#pendingTable tbody tr').forEach(row => {
+      const text = row.dataset.search.toLowerCase();
+      row.style.display = text.includes(term) ? '' : 'none';
+    });
+  }, 300));
+});
+</script>
+{% endblock %}

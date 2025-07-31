@@ -1,0 +1,107 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard de Apropriações{% endblock %}
+{% block content %}
+
+<div class="upload-section">
+  <a href="{{ url_for('main.upload') }}" class="btn-upload">
+    <i class="fa fa-upload"></i> Carregar Planilhas
+  </a>
+</div>
+
+<!-- Filtros: disciplina, data e status -->
+<form method="get" action="{{ url_for('main.dashboard') }}" class="filter-form">
+  <!-- Preserva o arquivo selecionado -->
+  <input type="hidden" name="file" value="{{ selected_file }}">
+
+  <label>Disciplina:</label>
+  <select name="discipline" onchange="this.form.submit()">
+    <option value="All" {% if selected_discipline=='All' %}selected{% endif %}>Todas</option>
+    {% for d in disciplines %}
+      <option value="{{ d }}" {% if d==selected_discipline %}selected{% endif %}>{{ d }}</option>
+    {% endfor %}
+  </select>
+
+  <label>Data:</label>
+  <select name="date" onchange="this.form.submit()">
+    <option value="All" {% if selected_date=='All' %}selected{% endif %}>Todas</option>
+    {% for dt in dates %}
+      <option value="{{ dt }}" {% if dt==selected_date %}selected{% endif %}>{{ dt }}</option>
+    {% endfor %}
+  </select>
+
+  <label>Status:</label>
+  <select name="error" onchange="this.form.submit()">
+    {% for opt in error_options %}
+      <option value="{{ opt }}" {% if opt==selected_error %}selected{% endif %}>{{ opt }}</option>
+    {% endfor %}
+  </select>
+
+  <!-- Botão para ir à aba de validação -->
+  <a
+    href="{{ url_for('main.validation', file=selected_file, discipline=selected_discipline) }}"
+    class="btn-validate"
+  >
+    <i class="fa fa-table"></i> Validação
+  </a>
+
+  <!-- Dentro de <form class="filter-form">, ao lado do botão Validação -->
+<a
+  href="{{ url_for('main.atestado', file=selected_file) }}"
+  class="btn-upload"
+  style="margin-left: 10px;"
+>
+  <i class="fa fa-user-times"></i> Atestado/Falta
+</a>
+
+</form>
+
+<div class="cards">
+  {% for card in cards %}
+    <div class="card">
+      <i class="fa {{ card.icon }}"></i>
+      <div class="info">
+        <h3>{{ card.value }}</h3>
+        <p>{{ card.title }}</p>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+
+<div class="table-container">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>DATA</th>
+        <th>COLABORADOR</th>
+        <th>DISCIPLINA</th>
+        <th>TOTAL HH</th>
+        <th>STATUS</th>
+        <th>HH NORMAL</th>
+        <th>HH EXTRA</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in entries %}
+      <tr class="{% if r['ERROR'] %}error-row{% endif %}">
+        <td>{{ r['DATARDO_STR'] }}</td>
+        <td>{{ r['OBSERVAÇÃO'] }}</td>
+        <td>{{ r['DISCIPLINA'] }}</td>
+        <td>{{ '%.2f'|format(r['TOTAL_HH']) }}</td>
+        <td>
+          {% if r['ERROR'] %}
+            <i class="fa fa-exclamation-circle status-error"></i>
+          {% else %}
+            <i class="fa fa-check-circle status-ok"></i>
+          {% endif %}
+        </td>
+        <td>{{ '%.2f'|format(r['HORA NORMAL']) }}</td>
+        <td>{{ '%.2f'|format(r['HORA EXTRA']) }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+
+
+{% endblock %}

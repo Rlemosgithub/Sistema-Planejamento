@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Pendente CPA{% endblock %}
+{% block content %}
+
+<div class="validation-header">
+  <h2>Pendente CPA</h2>
+
+  <form method="get" action="{{ url_for('main.pending') }}" class="validation-filters">
+    <label>Arquivo:</label>
+    <select name="file" onchange="this.form.submit()">
+      {% for f in files %}
+        <option value="{{ f }}" {% if f==selected_file %}selected{% endif %}>{{ f }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Disciplina:</label>
+    <select name="discipline" onchange="this.form.submit()">
+      <option value="All" {% if selected_discipline=='All' %}selected{% endif %}>Todas</option>
+      {% for d in disciplines %}
+        <option value="{{ d }}" {% if d==selected_discipline %}selected{% endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+
+    <label>Data:</label>
+    <select name="date" onchange="this.form.submit()">
+      <option value="All" {% if selected_date=='All' %}selected{% endif %}>Todas</option>
+      {% for dt in dates %}
+        <option value="{{ dt }}" {% if dt==selected_date %}selected{% endif %}>{{ dt }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="table-container">
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Colaborador</th>
+        <th>Disciplina</th>
+        <th>Data</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in pending %}
+      <tr>
+        <td>{{ p.OBSERVAÇÃO }}</td>
+        <td>{{ p.DISCIPLINA }}</td>
+        <td>{{ p.DATARDO_STR }}</td>
+      </tr>
+      {% endfor %}
+      {% if pending|length == 0 %}
+      <tr>
+        <td colspan="3" style="text-align:center; color:#777;">
+          Nenhum pendente encontrado.
+        </td>
+      </tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Validação de HH{% endblock %}
+{% block content %}
+
+<div class="validation-header">
+  <form method="get" action="{{ url_for('main.validation') }}" class="validation-filters">
+    <label>Arquivo:</label>
+    <select name="file" onchange="this.form.submit()">
+      {% for f in files %}
+        <option value="{{ f }}" {% if f==selected_file %}selected{% endif %}>{{ f }}</option>
+      {% endfor %}
+    </select>
+    <label>Disciplina:</label>
+    <select name="discipline" onchange="this.form.submit()">
+      <option value="All" {% if selected_discipline=='All' %}selected{% endif %}>Todas</option>
+      {% for d in disciplines %}
+        <option value="{{ d }}" {% if d==selected_discipline %}selected{% endif %}>{{ d }}</option>
+      {% endfor %}
+    </select>
+  </form>
+</div>
+
+<div class="validation-table-container">
+  <table class="validation-table">
+    <thead>
+      <tr>
+        {% for col in columns %}
+          <th>{{ col }}</th>
+        {% endfor %}
+      </tr>
+    </thead>
+    <tbody>
+      {% for row in pivot %}
+      <tr>
+        {% for col in columns %}
+        {# Se houver justificativa, usa row[col_class]; 
+           senão, se erro (row[col_error]==True), pinta de vermelho; 
+           senão se 'X', aplica empty-cell; #}
+        <td class="
+            {% if row[col ~ '_class'] %}
+              {{ row[col ~ '_class'] }}
+            {% elif row[col ~ '_error'] %}
+              error-cell
+            {% elif row[col] == 'X' %}
+              empty-cell
+            {% endif %}
+          ">
+          {{ row[col] }}
+        </td>
+        {% endfor %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

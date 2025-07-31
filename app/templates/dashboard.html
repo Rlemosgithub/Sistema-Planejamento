@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+{% set title = 'Dashboard' %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<style>
+  .dashboard-container { max-width: 1400px; margin: auto; padding: 16px; }
+  .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 16px; }
+  .card { text-align: center; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+  <div class="filters-bar">
+    <div class="flex flex-col">
+      <label>Busca</label>
+      <div class="search-bar">
+        <i class="fa fa-search"></i>
+        <input id="liveSearch" type="text" class="form-control" placeholder="Busca ao vivo..." value="{{ search_text }}">
+      </div>
+    </div>
+    <div class="flex flex-col">
+      <label>Disciplina</label>
+      <select id="filterDiscipline" class="form-select">
+        <option value="All">Todas Disciplinas</option>
+        {% for d in disciplines %}
+          <option value="{{ d }}" {% if d == selected_discipline %}selected{% endif %}>{{ d }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex flex-col">
+      <label>Data</label>
+      <select id="filterDate" class="form-select">
+        <option value="All">Todas Datas</option>
+        {% for dt in dates %}
+          <option value="{{ dt }}" {% if dt == selected_date %}selected{% endif %}>{{ dt }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="flex flex-col">
+      <label>Status</label>
+      <select id="filterStatus" class="form-select">
+        <option value="All">Todos Status</option>
+        <option value="Ok" {% if selected_error == 'Ok' %}selected{% endif %}>Ok</option>
+        <option value="Erro" {% if selected_error == 'Erro' %}selected{% endif %}>Erro</option>
+      </select>
+    </div>
+    <div class="flex items-end gap-2">
+      <a href="{{ url_for('main.upload') }}" class="btn btn-sm">
+        <i class="fa fa-upload"></i> Carregar
+      </a>
+      <a href="javascript:void(0);" id="btnExportCSV" class="btn btn-outline btn-sm">
+        <i class="fa fa-file-csv"></i> CSV
+      </a>
+      <a href="{{ url_for('main.export_dashboard', file=selected_file, discipline=selected_discipline, date=selected_date, error=selected_error, search=search_text) }}"
+         class="btn btn-outline btn-sm">
+        <i class="fa fa-file-export"></i> Excel
+      </a>
+    </div>
+  </div>
+  <div class="cards-grid">
+    {% for card in cards %}
+      <div class="card">
+        <i class="fa {{ card.icon }} fa-lg card-icon"></i>
+        <div class="card-title">{{ card.title }}</div>
+        <div class="card-value">{{ card.value }}</div>
+      </div>
+    {% endfor %}
+  </div>
+  <div class="card chart-container mb-4">
+    <div class="card-title">Resumo de Horas</div>
+    <canvas id="hoursChart"></canvas>
+  </div>
+  <div class="table-container">
+    <table id="entriesTable" class="data-table">
+      <thead>
+        <tr>
+          <th>DATA</th>
+          <th>COLABORADOR</th>
+          <th>DISCIPLINA</th>
+          <th>TOTAL HH</th>
+          <th>STATUS</th>
+          <th>HH NORMAL</th>
+          <th>HH EXTRA</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in entries %}
+          <tr data-search="{{ r.OBSERVAÇÃO }} {{ r.DISCIPLINA }} {{ r.DATARDO_STR }}"
+              data-discipline="{{ r.DISCIPLINA }}"
+              data-date="{{ r.DATARDO_STR }}"
+              data-status="{% if r.ERROR %}Erro{% else %}Ok{% endif %}">
+            <td>{{ r.DATARDO_STR }}</td>
+            <td>{{ r.OBSERVAÇÃO }}</td>
+            <td>{{ r.DISCIPLINA }}</td>
+            <td>{{ '%.2f'|format(r.TOTAL_HH) }}</td>
+            <td class="text-center">
+              {% if r.ERROR %}
+                <i class="fa fa-exclamation-circle text-error"></i>
+              {% else %}
+                <i class="fa fa-check-circle text-success"></i>
+              {% endif %}
+            </td>
+            <td>{{ '%.2f'|format(r['HORA NORMAL']) }}</td>
+            <td>{{ '%.2f'|format(r['HORA EXTRA']) }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const liveSearch = document.getElementById('liveSearch');
+  const filterDiscipline = document.getElementById('filterDiscipline');
+  const filterDate = document.getElementById('filterDate');
+  const filterStatus = document.getElementById('filterStatus');
+  const rows = document.querySelectorAll('#entriesTable tbody tr');
+
+  function filterTable() {
+    const term = liveSearch.value.toLowerCase();
+    const disc = filterDiscipline.value;
+    const date = filterDate.value;
+    const status = filterStatus.value;
+    rows.forEach(row => {
+      const textMatch = row.dataset.search.toLowerCase().includes(term);
+      const discMatch = disc === 'All' || row.dataset.discipline === disc;
+      const dateMatch = date === 'All' || row.dataset.date === date;
+      const statusMatch = status === 'All' || row.dataset.status === status;
+      row.style.display = textMatch && discMatch && dateMatch && statusMatch ? '' : 'none';
+    });
+  }
+
+  liveSearch.addEventListener('keyup', debounce(filterTable, 300));
+  filterDiscipline.addEventListener('change', () => {
+    filterTable();
+    updateUrl();
+  });
+  filterDate.addEventListener('change', () => {
+    filterTable();
+    updateUrl();
+  });
+  filterStatus.addEventListener('change', () => {
+    filterTable();
+    updateUrl();
+  });
+
+  function updateUrl() {
+    const url = new URL(window.location);
+    url.searchParams.set('discipline', filterDiscipline.value);
+    url.searchParams.set('date', filterDate.value);
+    url.searchParams.set('error', filterStatus.value);
+    url.searchParams.set('search', liveSearch.value);
+    window.history.pushState({}, '', url);
+  }
+
+  document.getElementById('btnExportCSV').addEventListener('click', function() {
+    const rows = Array.from(document.querySelectorAll('#entriesTable tbody tr'))
+      .filter(r => r.style.display !== 'none');
+    const csv = ['DATA,COLABORADOR,DISCIPLINA,TOTAL HH,STATUS,HH NORMAL,HH EXTRA']
+      .concat(rows.map(row =>
+        Array.from(row.querySelectorAll('td'))
+          .map(cell => `"${cell.innerText.replace(/"/g, '""')}"`)
+          .join(',')
+      )).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'export.csv';
+    link.click();
+  });
+});
+</script>
+{% endblock %}

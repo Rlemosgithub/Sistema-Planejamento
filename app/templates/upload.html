@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% set title = 'Carregar Planilhas' %}
+{% set breadcrumbs = 'Carregar Planilhas' %}
+
+{% block content %}
+<div class="container-fluid py-3">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title mb-4">Carregar Planilhas</h5>
+      <form method="post" enctype="multipart/form-data" class="row g-3">
+        <div class="col-md-4">
+          <label for="file" class="form-label">Planilha de Horas</label>
+          <input type="file" class="form-control form-control-sm" id="file"
+                 name="file" accept=".xls,.xlsx" required>
+        </div>
+        <div class="col-md-4">
+          <label for="discipline_file" class="form-label">Planilha de Disciplinas</label>
+          <input type="file" class="form-control form-control-sm"
+                 id="discipline_file" name="discipline_file" accept=".xls,.xlsx">
+        </div>
+        <div class="col-md-4">
+          <label for="vacation_file" class="form-label">Férias - INSS</label>
+          <input type="file" class="form-control form-control-sm"
+                 id="vacation_file" name="vacation_file" accept=".xls,.xlsx">
+        </div>
+        <div class="col-12 text-end">
+          <button type="submit" class="btn btn-upload">
+            <i class="fa fa-upload me-1"></i> Carregar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{% block title %}{% endblock %}</title>
+  <link rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}">
+  <link rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='img/logo.png') }}" alt="Logo">
+    </div>
+    <nav>
+      <ul>
+        <li>
+          <a href="{{ url_for('main.dashboard', file=selected_file) }}"
+             class="{% if request.endpoint=='main.dashboard' %}active{% endif %}">
+            <i class="fa fa-home"></i><span>Painéis</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('main.upload') }}"
+             class="{% if request.endpoint=='main.upload' %}active{% endif %}">
+            <i class="fa fa-upload"></i><span>Upload</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('main.pending', file=selected_file) }}"
+             class="{% if request.endpoint=='main.pending' %}active{% endif %}">
+            <i class="fa fa-hourglass-half"></i><span>Pendente CPA</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('main.validation', file=selected_file) }}"
+             class="{% if request.endpoint=='main.validation' %}active{% endif %}">
+            <i class="fa fa-table"></i><span>Validação</span>
+          </a>
+        </li>
+        <li>
+          <a href="{{ url_for('main.atestado', file=selected_file) }}"
+             class="{% if request.endpoint in ['main.atestado','main.atestado_edit'] %}active{% endif %}">
+            <i class="fa fa-user-clock"></i><span>Atestado/Falta</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
+    <div class="user">
+      <img src="{{ url_for('static', filename='img/user.png') }}" alt="Usuário">
+      <span>Usuário</span>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="top-nav">
+      <div class="breadcrumbs">
+        <i class="fa fa-home"></i> /
+        {% if request.endpoint=='main.dashboard' %}Painéis{% endif %}
+        {% if request.endpoint=='main.upload' %}Upload{% endif %}
+        {% if request.endpoint=='main.pending' %}Pendente CPA{% endif %}
+        {% if request.endpoint=='main.validation' %}Validação{% endif %}
+        {% if request.endpoint in ['main.atestado','main.atestado_edit'] %}Atestado/Falta{% endif %}
+      </div>
+      <div class="actions">
+        <i class="fa fa-envelope"></i>
+        <i class="fa fa-cog"></i>
+      </div>
+    </header>
+
+    <section class="content-area">
+      {% with msgs = get_flashed_messages(with_categories=true) %}
+        {% if msgs %}
+          <div class="alerts">
+            {% for category, message in msgs %}
+              <div class="alert {{ category }}">{{ message }}</div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+      {% block content %}{% endblock %}
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+</html>

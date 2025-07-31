@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+{% set title = 'Validação' %}
+{% set breadcrumbs = 'Validação' %}
+
+{% block head %}
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+<style>
+  .container { max-width: 1400px; margin: auto; padding: 16px; }
+  .validation-table th:first-child,
+  .validation-table td:first-child { 
+    position: sticky; 
+    left: 0; 
+    background: var(--primary); 
+    color: #FFFFFF; 
+    z-index: 11; 
+  }
+  .validation-table th:nth-child(2),
+  .validation-table td:nth-child(2) { 
+    position: sticky; 
+    left: 120px; 
+    background: var(--primary); 
+    color: #FFFFFF; 
+    z-index: 11; 
+  }
+  .hours-cell {
+    background-color: #d1fae5 !important; /* Light green for hours */
+    color: #065f46 !important; /* Dark green text */
+    font-weight: bold;
+  }
+  .total-hh-cell {
+    background-color: #fee2e2 !important; /* Light red for total */
+    color: #991b1b !important; /* Dark red text */
+    font-weight: bold;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+  <div class="card mb-4">
+    <div class="card-title p-3">Filtros de Validação</div>
+    <form method="get" action="{{ url_for('main.validation') }}" class="filters-bar">
+      <div class="flex flex-col flex-1 min-w-[160px]">
+        <label>Arquivo</label>
+        <select name="file" class="form-select" onchange="this.form.submit()">
+          <option value="">Selecione um arquivo</option>
+          {% for f in files %}
+            <option value="{{ f }}" {% if f == selected_file %}selected{% endif %}>{{ f }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex flex-col flex-1 min-w-[160px]">
+        <label>Disciplina</label>
+        <select name="discipline" class="form-select" onchange="this.form.submit()">
+          <option value="All" {% if selected_discipline == 'All' %}selected{% endif %}>Todas</option>
+          {% for d in disciplines %}
+            <option value="{{ d }}" {% if d == selected_discipline %}selected{% endif %}>{{ d }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="flex flex-col flex-1 min-w-[160px]">
+        <label>Pesquisar</label>
+        <div class="search-bar">
+          <i class="fa fa-search"></i>
+          <input type="text" id="validationSearch" name="search" class="form-control" 
+                 placeholder="Colaborador..." value="{{ request.args.get('search', '') }}">
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="validation-table-container">
+    <table id="validationTable" class="validation-table">
+      <thead>
+        <tr>
+          {% for col in columns %}
+            <th>{{ col }}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in pivot %}
+          <tr>
+            {% for col in columns %}
+              {% set cell = row[col] %}
+              {% set cls = row[col ~ '_class'] if col ~ '_class' in row else '' %}
+              <td class="{{ cls }}" 
+                  {% if row[col ~ '_title'] %}
+                    title="{{ row[col ~ '_title'] }}"
+                  {% endif %}>
+                {{ cell }}
+              </td>
+            {% endfor %}
+          </tr>
+        {% endfor %}
+        {% if not pivot %}
+          <tr>
+            <td colspan="{{ columns|length }}" class="text-center py-4 text-gray-600">
+              Nenhum registro encontrado.
+            </td>
+          </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const input = document.getElementById('validationSearch');
+  const rows = document.querySelectorAll('#validationTable tbody tr');
+  input.addEventListener('input', debounce(() => {
+    const term = input.value.trim().toLowerCase();
+    rows.forEach(r => {
+      const name = r.cells[0].textContent.trim().toLowerCase();
+      r.style.display = name.includes(term) ? '' : 'none';
+    });
+  }, 300));
+});
+</script>
+{% endblock %}
